@@ -20,7 +20,17 @@ function createProjectsDialog() {
 	//$( "dialog-form" ).dialog( "open" );
 }
 
-function selectProject(folderId) {
+function selectProject(title) {
+   var projects = getProjects();
+   var folderId;
+   for (var i = 0; i < projects.items.length; i++)
+   {
+      if (projects.items[i].title == "title")
+      {
+         folderId = projects.items[i].folderId;
+      }
+   }
+   
    getFileInFolder('project.kcms', folderId, function(fileId) {
       getFileWithId(fileId, function(file) {
          getJSONContent(file, function(json) {
