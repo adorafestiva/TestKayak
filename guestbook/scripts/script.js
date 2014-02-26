@@ -4,11 +4,10 @@ function chooseProjects() {
 	loadProjectsFile();
 	
 	// Get contents of .projects file
-	window.setTimeout(createProjectsDialog,1500);
+	window.setTimeout(createProjectsDialog, 5000);
 }
 
-function createProjectsDialog()
-{
+function createProjectsDialog() {
 	var projects = getProjects();
 	console.log(projects);
 	
@@ -18,20 +17,15 @@ function createProjectsDialog()
 	else {
 		console.log(' There are ' + projects.projects.length + ' projects');
 	}
-	$( "dialog-form" ).dialog( "open" );
+	//$( "dialog-form" ).dialog( "open" );
 }
 
-$( "dialog-form" ).dialog({
-      autoOpen: flase,
-      height: 300,
-      width: 350,
-      modal: true,
-      buttons: {
-        Cancel: function() {
-          $( this ).dialog( "close" );
-        }
-      },
-      close: function() {
-        allFields.val( "" ).removeClass( "ui-state-error" );
-      }
-    });
+function selectProject(folderId) {
+   getFileInFolder('project.kcms', folderId, function(fileId) {
+      getFileWithId(fileId, function(file) {
+         getJSONContent(file, function(json) {
+            setKCMS(json);
+         });
+      });
+   });
+}

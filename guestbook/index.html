@@ -63,7 +63,7 @@
 				</fieldset>
 			</form>
 		</div>
-        <!--<input name="printFileData" id="printFileData" type="text" />
+        <input name="printFileData" id="printFileData" type="text" />
         <input name="pfile" onclick="getFile($(this).prev('#printFileData').val(), getFileMetadata)" type="button" value="Get File MetaData" />
         <p>
         
@@ -91,6 +91,10 @@
         <input name="folderNameButton" onclick="createNewFolder($(this).prev('#folderName').val())" type="button" value="Create Folder" />
         
         <p>
+        <input name="selectProj" id="selectProj" type="text" />
+        <input name="selectProjForm" onclick="selectProject($(this).prev('#selectProj').val())" type="button" value="Select Project" />
+        
+        <p>
         <p>
         Update a file:
         <p>
@@ -111,7 +115,8 @@
         <br />
         <textarea id="results" cols="80"></textarea><button name="cleartxt" onclick="cleartext()">Clear Text</button>
         
-        <button name="getprojects" onclick="loadProjectsFile()">Get Projects</button> -->
+        <button name="getprojects" onclick="loadProjectsFile()">Get Projects</button>
+        
       </div>
       <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 	  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>

@@ -241,7 +241,8 @@ function createNewFolder(folderName, callback) {
       "mimeType" : "application/vnd.google-apps.folder",
    }
    });
-   request.execute(function(resp) { 
+   request.execute(function(resp) {
+      console.log(folderName + '   ' + resp.id); 
       if(callback)
       {
          callback(resp);
@@ -381,6 +382,36 @@ function getRootId(fileName, content, callback) {
   });
 }
 
+function getJSONContent(file, callback, callbackParam) {
+   var download_url = file['downloadUrl'];
+   
+   var accessToken = gapi.auth.getToken().access_token;
+   var xhr = new XMLHttpRequest();
+   xhr.open('GET', download_url);
+   xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+   xhr.onload = function() {
+      var json = JSON.parse(xhr.response);
+      callback(json);
+   };
+   xhr.onerror = function() {
+      console.log('Error when trying to getting file contents.');
+   };
+   xhr.send();
+}
+
+function getFileWithId(fileId, callback, callbackParam) {
+  var request = gapi.client.request({
+    'path': '/drive/v2/files/' + fileId,
+    'method': 'GET'
+    });
+  var file = request.execute(function(resp) {
+    console.log(resp);
+    if(callback) {
+      callback(resp, callbackParam);
+    }
+  });
+}
+
 function getFileInFolder(fileName, folderId, callback, callbackParam) {
   var query = 'title = ' + "'" + fileName + "'";
   var request = gapi.client.request({
@@ -391,7 +422,7 @@ function getFileInFolder(fileName, folderId, callback, callbackParam) {
   var file = request.execute(function(resp) {
     console.log(resp.items[0].id);
     if(callback) {
-      callback(resp.items[0], callbackParam);
+      callback(resp.items.id, callbackParam);
     }
   });
 }
