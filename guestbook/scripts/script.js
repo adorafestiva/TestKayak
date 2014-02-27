@@ -56,7 +56,10 @@ function loadProject(folderId) {
 		getFileWithId(fileId, function(file) {
 			getJSONContent(file, function(json) {
 				setKCMS(json);
-				document.getElementById('editProject').style.display = 'block';	
+				document.getElementById('editProject').style.display = 'block';
+				showPages();	
+				showTemplates();
+				showTiles();
 			});
 		});
 	});
@@ -69,18 +72,56 @@ function showSelectTemplateForm(projectTitle) {
 }
 
 function selectTemplate() {
+   var prj = getProjects();
+   var folderId;
 	var choices = document.getElementsByName("templateSeletion");
 	for (var i = 0; i < choices.length; i++) {
 		if (choices[i].checked) {
-			loadProject(prj.projects[i].folderid);
+		   folderId = prj.projects[i].folderid;
+			loadProject(folderId);
 		}
 	}
 	
 	getFileInFolder('project.kcms', folderId, function(fileId) {
-	getFileWithId(fileId, function(file) {
-		getJSONContent(file, function(json) {
-			setKCMS(json);
-			document.getElementById('editProject').style.display = 'block';	
-		});
+	   getFileWithId(fileId, function(file) {
+		   getJSONContent(file, function(json) {
+			   setKCMS(json);
+			   document.getElementById('selectTemplate').style.display = 'none';
+			   document.getElementById('editProject').style.display = 'block';	
+		   });
+	   });
 	});
+}
+
+function showPages() {
+   var pages = getPages();
+	var formHTML = "<br />";
+	for (var i = 0; i < pages.length; i++)
+	{
+		formHTML = formHTML + '<br />' + pages[i].title;
+	}
+	
+	$( "div#pagesList" ).html(formHTML);
+}
+
+function showTemplates() {
+   var templates = getTemplates();
+	var formHTML = "<br />";
+	for (var i = 0; i < templates.length; i++)
+	{
+		formHTML = formHTML + '<br />' + templates[i].title;
+	}
+	
+	$( "div#templatesList" ).html(formHTML);
+}
+
+function showTiles() {
+   var tiles = getTiles();
+	var formHTML = "<br />";
+	for (var i = 0; i < tiles.length; i++)
+	{
+		formHTML = formHTML + '<br />' + tiles[i].title;
+	}
+	
+	$( "div#tilesList" ).html(formHTML);
 }

@@ -15,7 +15,7 @@ function createProject(projectTitle, callback) {
 				json.projects.push({ "title": projectTitle, "id": "someuniqueid", "folderid": CURRENTDIRECTORY.id });
 				setProjects(json);
 				getFile('.projects', false, updateFile, JSON.stringify(json));
-				callback(CURRENTDIRECTORY.id);
+				//callback(CURRENTDIRECTORY.id);
 			});
 		});
 
@@ -37,8 +37,20 @@ function createPage(title) {
 		getFileInFolder('project.kcms', KCMS.folderIDs.main, function(fileId) {
 			getFileWithId(fileId, function(file) {
 				updateFile(file, JSON.stringify(KCMS));
+				showPages();
 			});
 		});
 	});
 }
 
+function getPages() {
+   return KCMS.pages;
+}
+
+function getTemplates() {
+   return KCMS.templates;
+}
+
+function getTiles() {
+   return KCMS.tiles;
+}
