@@ -7,36 +7,9 @@
 	  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
    </head>
    <body>
-	  <!--Hello and welcome to the Drive API test screen!
-	  <br>
-	  If you need any assistance, click the "Show Instructions" button below.
-	  <p>
-	  <button id="show" onclick="showinstructions()">Show Instructions</button>
-	  <button id="hide" onclick="hideinstructions()" style="display: none">Hide Instructions</button>
-	  <div id="instructions" style="display: none">
-		 Here are some instructions:
-		 <p>
-		 If you see the 'Authorize' button, start off by clicking it. <br />It'll ask you to log in to your Google account <br />and then ask you to accept some permissions <br />that will allow our program access to your Drive files.  <br />Don't worry, though, because as long as you follow the<br />instructions, nothing bad will happen to your files.<br />(and anything that <i>does</i> happen is completely reversible!)<br />If you're still worried, however, <br />feel free to create a test Google account.
-		 <p>
-		 After you've click the 'Authorize' button and logged in, <br /> a series of buttons and textboxes will appear.<br />These are how you test our program.
-		 <p>
-		 Here's what each of them do!
-		 <ul>"Choose File" button <ul> This will prompt you to select a file on your computer to upload to Drive.  Once you select the file, it will be pushed to Drive without any further interaction.</ul></ul>
-		 <ul>"Token Information" button<ul>Displays Google Drive access token value in Results: textarea and on your browser's javascript console.</ul></ul>
-		 <ul>"Get File MetaData" button and Text Box <ul>Enter a file name of a file that is on Drive (exactly as it appears when using the Drive UI) into the text box and click button.  The file's title, description, and MIME type will appear in the Results: textarea and on your browser's javascript console.</ul></ul>
-		 <ul>"Trash File" button and textbox<ul>Enter a file name of a file that is on Drive (exactly as it appears when using the Drive UI) into the text box and click button.  File will be moved from current folder to trash bin on Drive.  DOES NOT DELETE FILE!</ul></ul>
-		 <ul>"Untrash File" button and textbox<ul>Enter a file name of a file that is on Drive (exactly as it appears when using the Drive UI) into the text box and click button.  File will be restored from trash Drive.</ul></ul>
-		 <ul>"Watch File" button and textbox<ul>Enter a file name of a file that is on Drive (exactly as it appears when using the Drive UI) into the text box and click button.  If the file is altered, a notification will be sent.</ul></ul>
-		 <ul>"Get File Content" button and textbox<ul>Enter a file name of a file that is on Drive (exactly as it appears when using the Drive UI) into the text box and click button.  The content of the file will be displayed in the Results: textarea and on your browser's javascript console.  This works with any file with MIME type beginning with 'text', i.e. 'text/html', 'text/plain', etc.</ul></ul>
-		 <ul>Update File Form<ul>Enter a file name of a file that is on Drive (exactly as it appears when using the Drive UI) into the File Name: text box and click the Get File button.  The content of the file will be displayed in the File Content: text box.  Then, make any desired edits (in the form of HTML) to the content before selecting Submit. </ul></ul>
-		 <ul>New File Form<ul>Enter a file name of a file that you wish to create on Drive into the File Name: text box.  Enter any desired content (in the form of HTML) into the File Content box.  When done, select Submit. </ul></ul>
-	  </div>-->
-	  <!--Add a file picker for the user to start the upload process
-	  <input type="file" id="filePicker" style="display: none" /> -->
 	  <input type="button" id="authorizeButton" style="display: none" value="Authorize" />
-
-	  <!--<button style="display: block" name="tkInfo" id="tokenInfo" onclick="showToken()"> Token Information </button>-->
 		<div id="divAuthorizedContent" style="display: none">
+		   <div id="errorMessage"></div>
 			<button id="changeProject" onclick="showSelectProjectForm()">Change Project</button>
 			<div id="projectSelectForm" style="display: none">
 				<h3>Select A Project</h3>
@@ -55,11 +28,11 @@
 			</div>
 			
 			<div id="selectTemplate" style="display: none">
-				<h3>Select Template for Site</h3> 
+				<h3>Select Template for <span id="siteName"></span></h3> 
 				<br /> 
 				<form> 
 					<label for='templateTitle'>Template Title: </label>
-					<input id='templateSelect' name='templateSeletion' type='radio' value='Default'>Default</input>
+					<input id='templateSelect' name='templateSeletion' type='radio' value='Default' checked>Default</input>
 					<input type='button' value='Submit' onclick="selectTemplate()" /> 
 				</form>
 			</div>
@@ -69,81 +42,12 @@
 					<label for='pageTitle'>Page Title: </label><input id='pageTitle' type='text'> 
 					<input type='button' value='Create New Page' onclick="createPage(document.getElementById('pageTitle').value)" /> 
 				</form>
-			<p> <div id="pagesList">
-			</div> </p>
+			<div id="pagesList"></div>
 			
-			<p><h3>Templates: </h3><br />
-			<div id="templatesList">
-			</div> </p>
+			<p><h3>Templates: </h3><br /><div id="templatesList"></div> </p>
 			
-			<p><h3>Tiles: </h3><br />
-			<div id="tilesList">
-			</div> </p>
+			<p><h3>Tiles: </h3><br /><div id="tilesList"></div> </p>
 			</div>
-<!-- 		<div id="createProjectForm" title="Create New Project">
-			<p class="validateTips">All form fields are required.</p>
-			
-			<form>
-				<fieldset>
-					<label for="name">Project Name</label>
-					<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">
-				</fieldset>
-			</form>
-		</div>
-		<input name="printFileData" id="printFileData" type="text" />
-		<input name="pfile" onclick="getFile($(this).prev('#printFileData').val(), getFileMetadata)" type="button" value="Get File MetaData" />
-		<p>
-		
-		<input name="printFolderData" id="printFolderData" type="text" />
-		<input name="pfolder" onclick="getFolder($(this).prev('#printFolderData').val())" type="button" value="Get Folder Metadata" />
-		<p>
-		
-		<input name="trashfile" id="trashfile" type="text" />
-		<input name="tfile" onclick="getFile($(this).prev('#trashfile').val(), trashFile)" type="button" value="Trash File" />
-		<p>
-		
-		<input name="untrashfile" id="untrashfile" type="text" />
-		<input name="utfile" onclick="getFile($(this).prev('#untrashfile').val(), untrashFile)" type="button" value="Untrash File" />
-		<p>
-		
-		<input name="fileName" id="fileName" type="text" />
-		<input name="fileContent" onclick="getFile($(this).prev('#fileName').val(), getFileContents, 'results')" type="button" value="Get File Content" />
-		
-		<p>
-		<input name="projectName" id="projectName" type="text" />
-		<input name="projectButton" onclick="createProject($(this).prev('#projectName').val())" type="button" value="New Project" />
-		
-		<p>
-		<input name="folderName" id="folderName" type="text" />
-		<input name="folderNameButton" onclick="createNewFolder($(this).prev('#folderName').val())" type="button" value="Create Folder" />
-		
-		<p>
-		<input name="selectProj" id="selectProj" type="text" />
-		<input name="selectProjForm" onclick="selectProject($(this).prev('#selectProj').val())" type="button" value="Select Project" />
-		
-		<p>
-		<p>
-		Update a file:
-		<p>
-		File Name: <input name="updateFileName" id="updatefileName" type="text" /><button name="getCurrContent" id="getCurrContent" onclick="getFile(document.getElementById('updatefileName').value, getFileContents, 'updateFileContent')">Get File</button><br />
-		File Content: <br /><textarea name="updateFileContent" id="updateFileContent" type="text" style="width: 500; height: 300"></textarea>
-		<input name="updateFileContent" onclick="getFile(document.getElementById('updatefileName').value, updateFile, document.getElementById('updateFileContent').value)" type="button" value="Submit" />
-		
-		<p>
-		<p>
-		Create a new file:
-		<p>
-		File Name: <input name="newFileName" id="newFileName" type="text" /> <br />
-		Folder Name: <input name="folderName" id="folderName" type="text" /> <br />
-		File Content: <br /><textarea name="newFileContent" id="newFileContent" type="text" style="width: 500; height: 300"></textarea>
-		<input name="submitNewFile" onclick="createNewFile(document.getElementById('newFileName').value, document.getElementById('newFileContent').value,document.getElementById('folderName').value)" type="button" value="Submit" />
-		
-		Results:
-		<br />
-		<textarea id="results" cols="80"></textarea><button name="cleartxt" onclick="cleartext()">Clear Text</button>
-		
-		<button name="getprojects" onclick="loadProjectsFile()">Get Projects</button> -->
-		
 		</div>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
@@ -151,51 +55,5 @@
 		<script type="text/javascript" src="/scripts/project.js"></script>
 		<script type="text/javascript" src="/scripts/script.js"></script>
 		<script type="text/javascript" src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
-		<script type="text/javascript">
-			/**
-			* Creates an alert with supplied text
-			*
-			* @param {String} text String to be displayed in an alert
-			*/
-			function display(text) {
-				alert(text);
-			}
-
-			/**
-			* Clear textarea "results"
-			*/ 
-			function cleartext() {
-				var text = document.getElementById('results');
-				text.value = '';
-			}
-
-			/**
-			* Show instructions
-			*/
-			function showinstructions() {
-				var instr = document.getElementById('instructions');
-				instr.style.display = 'block';
-
-				var hide = document.getElementById('hide');
-				hide.style.display = 'block';
-
-				var show = document.getElementById('show');
-				show.style.display = 'none';
-			}
-
-			/**
-			* Hide instructions
-			*/
-			function hideinstructions() {
-				var instr = document.getElementById('instructions');
-				instr.style.display = 'none';
-
-				var hide = document.getElementById('hide');
-				hide.style.display = 'none';
-
-				var show = document.getElementById('show');
-				show.style.display = 'block';
-			}
-		</script>
 	</body>
 </html>

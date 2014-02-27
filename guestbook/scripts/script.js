@@ -16,23 +16,23 @@ function createProjectsDialog() {
 		console.log(' There are ' + projects.projects.length + ' projects');
 		showSelectProjectForm();
 	}
-	//$( "dialog-form" ).dialog( "open" );
 }
 
 function showNewProjectForm() {
-	document.getElementById('newProjectForm').style.display = 'block';
-	document.getElementById('projectSelectForm').style.display = 'none';
+	hideError();
+	$( "div#projectSelectForm" ).css('display','none');;
+	$( "div#newProjectForm" ).css('display','block');
 }
 
 function showSelectProjectForm() {
-	document.getElementById('projectSelectForm').style.display = 'block';
-	document.getElementById('newProjectForm').style.display = 'none';
-	document.getElementById('editProject').style.display = 'none';	
+	hideError();
+	$( "div#projectSelectForm" ).css('display','block');;
+	$( "div#newProjectForm" ).css('display','none');
+	$( "div#editProject" ).css('display','none');	
 	
 	var projects = getProjects();
 	var formHTML = "";
-	for (var i = 0; i < projects.projects.length; i++)
-	{
+	for (var i = 0; i < projects.projects.length; i++) {
 		formHTML = formHTML + '<input type="radio" name="selectprj" value=' + projects.projects[i].title + '>' + projects.projects[i].title + '</input><br />';
 	}
 	formHTML = formHTML + '<input type="button" value="Select Project" onclick="selectProject()" />';
@@ -40,6 +40,7 @@ function showSelectProjectForm() {
 }
 
 function selectProject() {
+	hideError();
 	var choices = document.getElementsByName("selectprj");
 	var prj = getProjects();
 	for (var i = 0; i < choices.length; i++) {
@@ -50,13 +51,13 @@ function selectProject() {
 }
 
 function loadProject(folderId) {
-	document.getElementById('projectSelectForm').style.display = 'none';
-	document.getElementById('newProjectForm').style.display = 'none';
+	$( "div#projectSelectForm" ).css('display','none');;
+	$( "div#newProjectForm" ).css('display','none');
 	getFileInFolder('project.kcms', folderId, function(fileId) {
 		getFileWithId(fileId, function(file) {
 			getJSONContent(file, function(json) {
 				setKCMS(json);
-				document.getElementById('editProject').style.display = 'block';
+				$( "div#editProject" ).css('display','block');
 				showPages();	
 				showTemplates();
 				showTiles();
@@ -66,62 +67,77 @@ function loadProject(folderId) {
 }
 
 function showSelectTemplateForm(projectTitle) {
-	createProject(projectTitle);
-	document.getElementById('newProjectForm').style.display = 'none';
-	document.getElementById('selectTemplate').style.display = 'block';
+	hideError();
+   	$( "div#newProjectForm" ).css('display','none');
+	createProject(projectTitle, function() {
+	   $( "span#siteName" ).html(projectTitle);
+	   $( "div#selectTemplate" ).css('display','block');
+	});
 }
 
 function selectTemplate() {
-   var prj = getProjects();
-   var folderId;
+	hideError();
+	var prj = getProject($( "span#siteName" ).text());
+	var checked;
 	var choices = document.getElementsByName("templateSeletion");
 	for (var i = 0; i < choices.length; i++) {
 		if (choices[i].checked) {
-		   folderId = prj.projects[i].folderid;
-			loadProject(folderId);
+		   checked = choices[i];
+			loadProject(prj.folderid);
+			break;
 		}
 	}
 	
-	getFileInFolder('project.kcms', folderId, function(fileId) {
+	getFileInFolder('project.kcms', prj.folderid, function(fileId) {
 	   getFileWithId(fileId, function(file) {
 		   getJSONContent(file, function(json) {
 			   setKCMS(json);
-			   document.getElementById('selectTemplate').style.display = 'none';
-			   document.getElementById('editProject').style.display = 'block';	
+			   $( "div#selectTemplate" ).css('display', 'none');
+			   $( "div#editProject" ).css('display', 'block');	
 		   });
 	   });
 	});
 }
 
+function showError(errorMessage, callback) {
+	$( "div#errorMessage" ).css('display','block');
+	$( "div#errorMessage" ).html('<font color="red"><h3>ERROR:</h3>' + errorMessage + '</font>');
+	if (callback) { callback(); }
+}
+
+function hideError() {
+	$( "div#errorMessage" ).css('display', 'none');
+}
+
 function showPages() {
-   var pages = getPages();
-	var formHTML = "<br />";
+	var pages = getPages();
+	var formHTML = "<ul>";
 	for (var i = 0; i < pages.length; i++)
 	{
-		formHTML = formHTML + '<br />' + pages[i].title;
+		formHTML = formHTML + '<li>' +  pages[i].title + '</li>';
 	}
-	
+	formHTML = formHTML + "</ul>";
 	$( "div#pagesList" ).html(formHTML);
 }
 
 function showTemplates() {
-   var templates = getTemplates();
-	var formHTML = "<br />";
+	var templates = getTemplates();
+	var formHTML = "<ul>";
 	for (var i = 0; i < templates.length; i++)
 	{
-		formHTML = formHTML + '<br />' + templates[i].title;
+		formHTML = formHTML + '<li>' +  templates[i].title + '</li>';
 	}
-	
+	formHTML = formHTML + "</ul>";
 	$( "div#templatesList" ).html(formHTML);
 }
 
 function showTiles() {
-   var tiles = getTiles();
-	var formHTML = "<br />";
+	var tiles = getTiles();
+	var formHTML = "<ul>";
 	for (var i = 0; i < tiles.length; i++)
 	{
-		formHTML = formHTML + '<br />' + tiles[i].title;
+		formHTML = formHTML + '<li>' +  tiles[i].title + '</li>';
 	}
-	
+	formHTML = formHTML + "</ul>";
 	$( "div#tilesList" ).html(formHTML);
 }
