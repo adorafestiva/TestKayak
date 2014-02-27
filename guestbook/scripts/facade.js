@@ -31,13 +31,13 @@ function handleAuthResult(authResult) {
    var authButton = document.getElementById('authorizeButton');
    authButton.style.display = 'none';
    
-   var filePicker = document.getElementById('filePicker');
-   filePicker.style.display = 'none';
+   //var filePicker = document.getElementById('filePicker');
+   //filePicker.style.display = 'none';
    
    if (authResult && !authResult.error) {
       // Access token has been successfully retrieved, requests can be sent to the API.
-      filePicker.style.display = 'block';
-      filePicker.onchange = uploadFile;
+      //filePicker.style.display = 'block';
+      //filePicker.onchange = uploadFile;
       divAuthorizedContent.style.display = 'block';
 	  chooseProjects();
    } else {
@@ -304,7 +304,7 @@ function updateFile(file, text, callback) {
       text +
       close_delim;
    
-   if (!callback) { callback = function(file) { console.log("Update Complete ",file) }; }
+   if (!callback) { callback = function(file) { }; }
 
    var request = gapi.client.request({
       'path': '/upload/drive/v2/files/fileId=' + file.id + '&uploadType=multipart',
@@ -327,7 +327,7 @@ function updateFile(file, text, callback) {
 * 
 * If such a file does not exist, create one.
 */
-function loadProjectsFile() {
+function loadProjectsFile(callback) {
   var query = "title = '.projects'";
   var request = gapi.client.request({
     'path': '/drive/v2/files/',
@@ -337,12 +337,19 @@ function loadProjectsFile() {
   var file = request.execute(function(resp) {
     if (resp.items.length == 0)
     {
-      console.log('No projects')
-      getRootId('.projects', '{ "projects": [ ] }', createNewFile);
+		setProjects(JSON.parse('{ "projects": [ ] }'));
+		getRootId(function(folderId) {
+			createNewFile('.projects', '{ "projects": [ ] }', folderId, function() {
+				callback();
+			});
+		});
     }
     else
     {
-      readProjectsFile(resp.items[0], setProjects);
+		readProjectsFile(resp.items[0], function(json) {
+			setProjects(json);
+			callback();
+		});
     }
   });
 }
@@ -372,13 +379,13 @@ function getProjects() {
 	return PROJECTS_JSON;
 }
 
-function getRootId(fileName, content, callback) {
+function getRootId(callback) {
   var request = gapi.client.request({
     'path': '/drive/v2/about/',
     'method': 'GET'
     });    
   request.execute(function(resp) {
-      callback(fileName, content, resp.rootFolderId);
+      callback(resp.rootFolderId);
   });
 }
 
@@ -405,7 +412,6 @@ function getFileWithId(fileId, callback, callbackParam) {
     'method': 'GET'
     });
   var file = request.execute(function(resp) {
-    console.log(resp);
     if(callback) {
       callback(resp, callbackParam);
     }
@@ -420,9 +426,8 @@ function getFileInFolder(fileName, folderId, callback, callbackParam) {
     'params': {'q': query}
     });
   var file = request.execute(function(resp) {
-    console.log(resp.items[0].id);
     if(callback) {
-      callback(resp.items.id, callbackParam);
+      callback(resp.items[0].id, callbackParam);
     }
   });
 }
