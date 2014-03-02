@@ -62,8 +62,9 @@ function getFile(titleName, inTrash, callback, callbackParam) {
 	});
 	var file = request.execute(function(resp) {
 		if (!resp.error) {
-			console.log(resp.items[0].id);
-			callback(resp.items[0], callbackParam);
+			if(callback) {
+				callback(resp.items[0], callbackParam);
+			}
 		} else {
 			showError("Received error code " + resp.error.code);
 		}
@@ -208,7 +209,7 @@ function untrashFile(file) {
 * @param {File} file File to get contents of.
 * @param {String} htmlId ID of the HTML element to write the file's contents to
 */
-function getFileContents(file, htmlId) {
+function getFileContents(file, callback) {
 	var download_url;
 	if (file.downloadUrl) {
 		download_url = file['downloadUrl'];
@@ -221,11 +222,11 @@ function getFileContents(file, htmlId) {
 	xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
 	xhr.onload = function() {
 		console.log(xhr.response);
-		writeTo(xhr.response, htmlId);
+		callback(xhr.response);
 	};
 	xhr.onerror = function() {
 		console.log('Error when trying to getting file contents.');
-		writeTo('Error when trying to get file contents.', htmlId);
+		//writeTo('Error when trying to get file contents.', htmlId);
 	};
 	xhr.send();
 }
@@ -287,8 +288,7 @@ function createNewFile(fileName, content, folderId, callback) {
 * @param {String} htmlId Element ID of the textarea to write to
 */
 function writeTo (text, htmlId) {
-	var results = document.getElementById(htmlId);
-	results.value = text;
+	$( htmlId ).html(text);
 }
 
 /**
@@ -453,4 +453,21 @@ function getFileInFolder(fileName, folderId, callback, callbackParam) {
 			showError("Received error code " + resp.error.code);
 		}
 	});
+}
+
+function getFileContentsWithURL(fileURL, callback) {
+	var download_url = fileURL;
+	var accessToken = gapi.auth.getToken().access_token;
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', download_url);
+	xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+	xhr.onload = function() {
+		console.log(xhr.response);
+		callback(xhr.response);
+	};
+	xhr.onerror = function() {
+		console.log('Error when trying to getting file contents.');
+		//writeTo('Error when trying to get file contents.', htmlId);
+	};
+	xhr.send();
 }

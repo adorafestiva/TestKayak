@@ -109,12 +109,17 @@ function hideError() {
 	$( "div#errorMessage" ).css('display', 'none');
 }
 
+function showPageToEdit(file) {
+	var button = '<button onlick="submitPage($( \"div#pageEdit\" ).html())">Submit</button>'
+	$( "div#pageEdit" ).html('<iframe srcdoc="'+ file +'"></iframe>' + button);
+}
+
 function showPages() {
 	var pages = getPages();
 	var formHTML = "<ul>";
 	for (var i = 0; i < pages.length; i++)
 	{
-		formHTML = formHTML + '<li>' +  pages[i].title + '</li>';
+		formHTML = formHTML + '<li id="li_' + i +'">' +  pages[i].title + ' <button id="bt_' + i + '" onclick="selectPage(' + i + ')">Edit</button></li>';
 	}
 	formHTML = formHTML + "</ul>";
 	$( "div#pagesList" ).html(formHTML);
