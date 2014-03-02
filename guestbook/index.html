@@ -9,7 +9,8 @@
    <body>
 	  <input type="button" id="authorizeButton" style="display: none" value="Authorize" />
 		<div id="divAuthorizedContent" style="display: none">
-		   <div id="errorMessage"></div>
+			<div id="header"><a href="https://accounts.google.com/logout" class="logout">Log out</a></div>
+			<div id="errorMessage"></div>
 			<button id="changeProject" onclick="showSelectProjectForm()">Change Project</button>
 			<div id="projectSelectForm" style="display: none">
 				<h3>Select A Project</h3>
@@ -37,17 +38,19 @@
 				</form>
 			</div>
 			<div id="editProject" style="display: none">
-			<p><h3>Pages: </h3></p>
-			<form> 
-					<label for='pageTitle'>Page Title: </label><input id='pageTitle' type='text'> 
-					<input type='button' value='Create New Page' onclick="createPage(document.getElementById('pageTitle').value)" /> 
-				</form>
-			<div id="pagesList"></div>
-			<div id="pageEdit"></div>
-			
-			<p><h3>Templates: </h3><br /><div id="templatesList"></div> </p>
-			
-			<p><h3>Tiles: </h3><br /><div id="tilesList"></div> </p>
+				<p><h3>Pages: </h3></p>
+				<form> 
+						<label for='pageTitle'>Page Title: </label><input id='pageTitle' type='text'> 
+						<input type='button' value='Create New Page' onclick="createPage(document.getElementById('pageTitle').value)" /> 
+					</form>
+				<div id="pagesList"></div>
+				<div id="pageEdit"></div>
+				
+				<p><h3>Templates: </h3></p>
+				<div id="templatesList"></div>
+				
+				<p><h3>Tiles: </h3></p>
+				<div id="tilesList"></div> 
 			</div>
 		</div>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -56,5 +59,12 @@
 		<script type="text/javascript" src="/scripts/project.js"></script>
 		<script type="text/javascript" src="/scripts/script.js"></script>
 		<script type="text/javascript" src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+		<script>
+			$('.logout').click(function (event) {
+				event.preventDefault();
+				window.open($(this).attr("href"), "popupWindow", "width=600,height=600,scrollbars=yes");
+				location.reload();
+			});
+		</script>
 	</body>
 </html>

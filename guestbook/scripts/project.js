@@ -1,5 +1,5 @@
 var KCMS = 'notset';
-const TEMPLATE = 'https://drive.google.com/uc?export=download&id=0B8DgRi1SFqK7NnE0RzJmaWJ1NFU';
+const TEMPLATE = ''; // Temporary
 
 function setCurrentDirectory(folder) {
 	CURRENTDIRECTORY = folder;
@@ -16,14 +16,14 @@ function createProject(projectTitle, callback) {
 		createNewFolder(projectTitle + '_Dev', function(folder) {
 			//var content = downloadTemplate(TEMPLATE);
 			setCurrentDirectory(folder);
-			getFileContentWithURL(template, function(file) {
-				createNewFile('template.html', file, CURRENTDIRECTORY.id);
-			}
-			createNewFile('project.kcms', '{ "title": "' + projectTitle +'", "pages": [ ], "templates": [ ], "tiles": [ ], "folderIDs": { "main": "' + CURRENTDIRECTORY.id +'" } }', CURRENTDIRECTORY.id, function(file) {
+			
+			var kcms = JSON.parse('{ "title": "' + projectTitle +'", "pages": [ ], "templates": [ ], "tiles": [ ], "folderIDs": { "main": "' + CURRENTDIRECTORY.id +'" } }');
+			setKCMS(kcms);
+			createNewFile('project.kcms', JSON.stringify(kcms, null, 4), CURRENTDIRECTORY.id, function(file) {
 				json = getProjects();
 				json.projects.push({ "title": projectTitle, "id": "someuniqueid", "folderid": CURRENTDIRECTORY.id });
 				setProjects(json);
-				getFile('.projects', false, updateFile, JSON.stringify(json));
+				getFile('.projects', false, updateFile, JSON.stringify(json, null, 4));
 				if (callback) { callback(); }
 			});
 		});
@@ -50,14 +50,9 @@ function createPage(title) {
 	hideError();
 	if (!isValidTitle(title)) { showError('Page title is invalid!<br />Please enter title using only letters, numbers, and underscores (_).');}
 	else {
-		createNewFile(title + '.html', '<!doctype html><html><head></head><body></body></html>', KCMS.folderIDs.main, function(fileid) {
+		copyFile('template.html', title + '.html', KCMS.folderIDs.main, function(fileid) {
 			KCMS.pages.push({ "title": title, "fileid": fileid});
-			getFileInFolder('project.kcms', KCMS.folderIDs.main, function(fileId) {
-				getFileWithId(fileId, function(file) {
-					updateFile(file, JSON.stringify(KCMS));
-					showPages();
-				});
-			});
+			updateKCMS(showPages);
 		});
 	}
 }
@@ -91,8 +86,7 @@ function selectPage(num) {
 	});
 }
 
-function downloadTemplate(url)
-{
+function downloadTemplate(url) {
   var iframe;
   iframe = document.getElementById("hiddenDownloader");
   if (iframe === null)
@@ -104,4 +98,37 @@ function downloadTemplate(url)
   }
   iframe.src = url;
   return iframe.contentDocument.body.innerHTML; 
+}
+
+function deleteProject(projectTitle) {
+	var prjs = getProjects(); // Get the current projects JSON
+	var folderId;
+	var newPrjs = {
+		projects: []
+	};
+	for (var i = 0; i < prjs.projects.length; i++)
+	{
+		if (prjs.projects[i].title != projectTitle) // Add all non-matching projects to the JSON array
+		{
+			newPrjs.push({"title": prjs.projects[i].title, "id": prjs.projects[i].id, "folderid": prjs.projects[i].folderid});
+		} else { // For the matching project, get the folder ID.
+			folderId = prjs.projects[i].folderid;
+		}
+	}
+	
+	setProjects(newPrjs); // Set the projects JSON
+	getFile('.projects', false, function(file) {
+		updateFile(file, JSON.stringify(newPrjs), function() {
+			getFolder(projectTitle + '_Pub', trashFile);
+			getFileWithId(folderId, trashFile);
+		});
+	});
+}
+
+function updateKCMS(callback) {
+	getFileInFolder('project.kcms', KCMS.folderIDs.main, function(fileId) {
+		getFileWithId(fileId, function(file) {
+			updateFile(file, JSON.stringify(KCMS, null, 4), callback);
+		});
+	});
 }

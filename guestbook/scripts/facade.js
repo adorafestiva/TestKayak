@@ -1,5 +1,5 @@
-var CLIENT_ID = '109658754904-8lohlq27j14j5e7c93qmjsj6mp868atg.apps.googleusercontent.com';
-var SCOPES = 'https://www.googleapis.com/auth/drive';
+const CLIENT_ID = '109658754904-8lohlq27j14j5e7c93qmjsj6mp868atg.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive';
 var PROJECTS_JSON = 'notset';
 var CURRENTDIRECTORY = 'notset';
 
@@ -52,6 +52,9 @@ function handleAuthResult(authResult) {
 * forward to callback function.
 *
 * @param {String} titleName The title of the file to retrieve
+* @param {Boolean} inTrash True if the file is in the trash; false otherwise
+* @param {Function} callback Function to call when the request is complete.
+* @param {String} callbackParam Additional parameter to pass to the callback function.
 */
 function getFile(titleName, inTrash, callback, callbackParam) {
 	var query = 'title = ' + "'" + titleName + "'";
@@ -75,6 +78,8 @@ function getFile(titleName, inTrash, callback, callbackParam) {
 * Get folder on Drive based on name
 *
 * @param {String} folderName The name of the folder
+* @param {Function} callback Function to call when the request is complete.
+* @param {String} callbackParam Additional parameter to pass to the callback function.
 */
 function getFolder(folderName, callback, callbackParam) {
 	var query = 'title = ' + "'" + folderName + "'";
@@ -207,7 +212,7 @@ function untrashFile(file) {
 * on page in text box under "File Content:".
 *
 * @param {File} file File to get contents of.
-* @param {String} htmlId ID of the HTML element to write the file's contents to
+* @param {Function} callback Function to call after getting the file contents
 */
 function getFileContents(file, callback) {
 	var download_url;
@@ -235,6 +240,7 @@ function getFileContents(file, callback) {
 * Create a new folder
 *
 * @param {String} folderName Folder name as it would appear in Drive
+* @param {Function} callback Function to call after the folder is created
 */
 function createNewFolder(folderName, callback) {
 	var request = gapi.client.request({
@@ -261,6 +267,8 @@ function createNewFolder(folderName, callback) {
 *
 * @param {String} fileName File name as it would appear in Drive
 * @param {String} content File content
+* @param {String} folderId ID of the folder to create the file in
+* @param {Function} callback Function to call after the file is created
 */
 function createNewFile(fileName, content, folderId, callback) {
 	var request = gapi.client.request({
@@ -337,6 +345,7 @@ function updateFile(file, text, callback) {
 * Get the .projects file on Drive and read the contents
 * 
 * If such a file does not exist, create one.
+* @param {Function} callback The function to be called once the request is complete
 */
 function loadProjectsFile(callback) {
 	var query = "title = '.projects'";
@@ -347,26 +356,36 @@ function loadProjectsFile(callback) {
 	});
 	var file = request.execute(function(resp) {
 		if (!resp.error) {
+			// If the .projects file doesn't exist, create it
 			if (resp.items.length == 0) {
+				// Make the default JSON for PROJECTS_JSON
 				setProjects(JSON.parse('{ "projects": [ ] }'));
+				// Create the .projects file in the root folder
 				getRootId(function(folderId) {
-					createNewFile('.projects', '{ "projects": [ ] }', folderId, function() {
+					createNewFile('.projects', JSON.stringify(PROJECTS_JSON, null, 4), folderId, function() {
 						callback();
 					});
 				});
 			}
-			else {
+			else { // If the .projects file exists, read the content in
 				readProjectsFile(resp.items[0], function(json) {
 					setProjects(json);
 					callback();
 				});
 			}
-		} else {
+		} else { // If an error is thrown when making the request, display the error message
 			showError("Received error code " + resp.error.code);
 		}
 	});
 }
 
+/**
+* Read the contents of the .projects file on Drive
+* 
+* @param {File} file The .projects file
+* @param {Function} callback The function to be called once the request is complete
+* @param {String} callbackParam Additional parameter to pass to the callback function.
+*/
 function readProjectsFile(file, callback, callbackParam) {
 	var download_url = file['downloadUrl'];
 	var accessToken = gapi.auth.getToken().access_token;
@@ -383,14 +402,30 @@ function readProjectsFile(file, callback, callbackParam) {
 	xhr.send();
 }
 
+
+/**
+* Set PROJECTS_JSON to the passed in JSON
+* 
+* @param {JSON} json JSON to set PROJECTS_JSON to
+*/
 function setProjects(json) {
 	PROJECTS_JSON = json;
 }
 
+/**
+* Return the PROJECTS_JSON
+* 
+* @return {JSON} PROJECTS_JSON
+*/
 function getProjects() {
 	return PROJECTS_JSON;
 }
 
+/**
+* Get the ID of the root folder on Drive
+* 
+* @param {Function} callback The function to be called once the request is complete
+*/
 function getRootId(callback) {
 	var request = gapi.client.request({
 		'path': '/drive/v2/about/',
@@ -405,6 +440,13 @@ function getRootId(callback) {
 	});
 }
 
+/**
+* Read the contents of a JSON file on Drive
+* 
+* @param {File} file The file to get the JSON contents from
+* @param {Function} callback The function to be called once the request is complete
+* @param {String} callbackParam Additional parameter to pass to the callback function.
+*/
 function getJSONContent(file, callback, callbackParam) {
 	var download_url = file['downloadUrl'];
 	var accessToken = gapi.auth.getToken().access_token;
@@ -421,6 +463,13 @@ function getJSONContent(file, callback, callbackParam) {
 	xhr.send();
 }
 
+/**
+* Get a file on Drive using the ID of the file
+* 
+* @param {String} fileId The fileId of the file on Drive to get
+* @param {Function} callback The function to be called once the request is complete
+* @param {String} callbackParam Additional parameter to pass to the callback function.
+*/
 function getFileWithId(fileId, callback, callbackParam) {
 	var request = gapi.client.request({
 		'path': '/drive/v2/files/' + fileId,
@@ -437,6 +486,14 @@ function getFileWithId(fileId, callback, callbackParam) {
 	});
 }
 
+/**
+* Get a file on Drive located in a particular folder with a particular name.
+* 
+* @param {String} fileName The name of the file to get from Drive
+* @param {String} folderId The ID of the folder where the file is located on Drive
+* @param {Function} callback The function to be called once the request is complete
+* @param {String} callbackParam Additional parameter to pass to the callback function.
+*/
 function getFileInFolder(fileName, folderId, callback, callbackParam) {
 	var query = 'title = ' + "'" + fileName + "'";
 	var request = gapi.client.request({
@@ -455,6 +512,12 @@ function getFileInFolder(fileName, folderId, callback, callbackParam) {
 	});
 }
 
+/**
+* Get a file on Drive at a particular URL.
+* 
+* @param {String} fileURL The URL of a file to get from Drive
+* @param {Function} callback The function to be called once the request is complete
+*/
 function getFileContentsWithURL(fileURL, callback) {
 	var download_url = fileURL;
 	var accessToken = gapi.auth.getToken().access_token;
@@ -467,7 +530,22 @@ function getFileContentsWithURL(fileURL, callback) {
 	};
 	xhr.onerror = function() {
 		console.log('Error when trying to getting file contents.');
-		//writeTo('Error when trying to get file contents.', htmlId);
 	};
 	xhr.send();
+}
+
+/**
+* Copy a file on Drive to a specified location with a specified name.
+* 
+* @param {String} originFileTitle The name of the file to be copied from Drive
+* @param {String} newTitle The new name of the file after being copied.
+* @param {String} newLocation The ID of the folder where the file is to be copied to
+* @param {Function} callback The function to be called once the request is complete
+*/
+function copyFile(originFileTitle, newTitle, newLocation, callback) {
+	getFile(originFileTitle, false, function(file) {
+		getFileContents(file, function(contents) {
+			createNewFile(newTitle, contents, newLocation, callback);
+		});
+	});
 }
