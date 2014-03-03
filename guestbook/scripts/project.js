@@ -1,10 +1,23 @@
-var KCMS = 'notset';
+var KCMS = 'notset'; // All of the information for this Project in JSON format
 const TEMPLATE = ''; // Temporary
 
+/**
+* Set the current working directory.
+* @param {File} folder Folder to set as the current working directory
+*/
 function setCurrentDirectory(folder) {
 	CURRENTDIRECTORY = folder;
 }
 
+/**
+* Create a project with specified title.  This creates
+* two folders on the user's drive.  In the Dev folder, the KCMS
+* file is created.  Also, the .projects file is updated to contain
+* this project.
+*
+* @param {String} projectTitle Title of the Project to create
+* @param {Function} callback The function to call once the request is complete.
+*/
 function createProject(projectTitle, callback) {
 	if (!isValidTitle(projectTitle) ) { 
 		showError('Project title is invalid!<br />Please enter title using only letters, numbers, and underscores (_).', function() {
@@ -32,20 +45,41 @@ function createProject(projectTitle, callback) {
 	}
 }
 
+/**
+* Set KCMS to the most up to date JSON.
+* @param {JSON} json JSON to set KCMS to
+*/
 function setKCMS(json) {
 	KCMS = json;
 }
 
+/**
+* Return KCMS
+* @return {JSON} KCMS
+*/
 function getKCMS() {
 	return KCMS;
 }
 
+/**
+* Verify that a particular title is valid for use.  To be
+* valid, the title must:
+*	- be non-null, non-empty, and a string
+*	- contain only numbers, letters (upper and lower case), and underscores
+* @param {String} title Title to check for validity
+* @return {Boolean} True if the title is valid; false otherwise.
+*/
 function isValidTitle(title) {
 	if (!title || title === "") { return false; } // First check to make sure the title is non-null, non-empty, and a string
 	else if (!title.match(/^[a-zA-Z0-9_]*$/)) { return false;} // Then check to make sure it only contains valid characters
 	else { return true; } // Otherwise, it's valid
 }
 
+/**
+* Create a new Page for the Project.
+*
+* @param {String} title Title for the new Page
+*/
 function createPage(title) {
 	hideError();
 	if (!isValidTitle(title)) { showError('Page title is invalid!<br />Please enter title using only letters, numbers, and underscores (_).');}
@@ -57,18 +91,36 @@ function createPage(title) {
 	}
 }
 
+/*
+* Return the list of Pages for the Project.
+* @return {JSONArray}
+*/
 function getPages() {
 	return KCMS.pages;
 }
 
+/*
+* Return the list of Templates for the Project.
+* @return {JSONArray}
+*/
 function getTemplates() {
 	return KCMS.templates;
 }
 
+/*
+* Return the list of Tiles for the Project.
+* @return {JSONArray}
+*/
 function getTiles() {
 	return KCMS.tiles;
 }
 
+/*
+* Gets a project with a given title.
+*
+* @param {String} projectTitle Title of the project to get
+* @return {JSON} Returns selected project
+*/
 function getProject(projectTitle) {
 	var projects = getProjects();
 
@@ -79,6 +131,11 @@ function getProject(projectTitle) {
 	}
 }
 
+/*
+* Loads a selected page to edit.
+*
+* @param {Number} num Number of selected page.
+*/
 function selectPage(num) {
 	var page = KCMS.pages[num];
 	getFileWithId(page.fileid, function (file) {
@@ -86,7 +143,7 @@ function selectPage(num) {
 	});
 }
 
-function downloadTemplate(url) {
+/*function downloadTemplate(url) {
   var iframe;
   iframe = document.getElementById("hiddenDownloader");
   if (iframe === null)
@@ -98,8 +155,14 @@ function downloadTemplate(url) {
   }
   iframe.src = url;
   return iframe.contentDocument.body.innerHTML; 
-}
+}*/
 
+/**
+* Deletes a project from Google Drive.  Updates the .projects
+* file to reflect the changes.
+*
+* @param {String} projectTitle Title of project to delete.
+*/ 
 function deleteProject(projectTitle) {
 	var prjs = getProjects(); // Get the current projects JSON
 	var folderId;
@@ -117,14 +180,21 @@ function deleteProject(projectTitle) {
 	}
 	
 	setProjects(newPrjs); // Set the projects JSON
+	
+	// Update .projects file
 	getFile('.projects', false, function(file) {
 		updateFile(file, JSON.stringify(newPrjs), function() {
-			getFolder(projectTitle + '_Pub', trashFile);
-			getFileWithId(folderId, trashFile);
+			getFolder(projectTitle + '_Pub', trashFile); // Trash Pub file
+			getFileWithId(folderId, trashFile); // Trash Dev file
 		});
 	});
 }
 
+/*
+* Update the KCMS file with the latest KCMS content.
+*
+* @param {Function} callback Function to call after request is complete.
+*/
 function updateKCMS(callback) {
 	getFileInFolder('project.kcms', KCMS.folderIDs.main, function(fileId) {
 		getFileWithId(fileId, function(file) {

@@ -98,6 +98,12 @@ function loadProject(folderId) {
 	});
 }
 
+/**
+* Creates the Project, and upon completion shows the
+* Select Template Form.
+*
+* @param {String} projectTitle Title of the Project to create
+*/
 function showSelectTemplateForm(projectTitle) {
 	hideError();
    	$( "div#newProjectForm" ).css('display','none');
@@ -107,6 +113,10 @@ function showSelectTemplateForm(projectTitle) {
 	});
 }
 
+/**
+* Called once a user has selected a template for a project.
+* The selected templated is copied to the user's project folder.
+*/
 function selectTemplate() {
 	hideError();
 	var prj = getProject($( "span#siteName" ).text());
@@ -131,21 +141,39 @@ function selectTemplate() {
 	});
 }
 
+/**
+* Display an error message at the top of the screen.
+* 
+* @param {String} errorMessage Message to display
+* @param {Function} callback Function to call after displaying the message.
+*/
 function showError(errorMessage, callback) {
 	$( "div#errorMessage" ).css('display','block');
 	$( "div#errorMessage" ).html('<font color="red"><h3>ERROR:</h3>' + errorMessage + '</font>');
 	if (callback) { callback(); }
 }
 
+/**
+* Hide the error message div
+*/
 function hideError() {
 	$( "div#errorMessage" ).css('display', 'none');
 }
 
+/**
+* Shows a selected Page to edit in the iframe.
+* @param {File} file File content to load into the iframe to view.
+*/
 function showPageToEdit(file) {
 	var button = '<button onlick="submitPage($( \"div#pageEdit\" ).html())">Submit</button>'
 	$( "div#pageEdit" ).html('<iframe srcdoc="'+ file +'"></iframe>' + button);
 }
 
+/**
+* Display the list of Pages for the current Project with
+* a button next to each to allow the user to select to 
+* open the page for editing.
+*/
 function showPages() {
 	var pages = getPages();
 	var formHTML = "<ul>";
@@ -157,6 +185,9 @@ function showPages() {
 	$( "div#pagesList" ).html(formHTML);
 }
 
+/**
+* Display the list of Templates for the current Project.
+*/
 function showTemplates() {
 	var templates = getTemplates();
 	var formHTML = "<ul>";
@@ -168,6 +199,9 @@ function showTemplates() {
 	$( "div#templatesList" ).html(formHTML);
 }
 
+/**
+* Display the list of Tiles for the current Project.
+*/
 function showTiles() {
 	var tiles = getTiles();
 	var formHTML = "<ul>";
